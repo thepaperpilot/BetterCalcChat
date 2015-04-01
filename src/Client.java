@@ -26,6 +26,7 @@ private JPanel questionImage;
 private JScrollPane pane2;
 private JPanel gallery;
 private JScrollPane galleryPane;
+
 private ArrayList<BufferedImage> images;
 private int selectedImage;
 
@@ -36,7 +37,7 @@ private Client() {
 	goButton.addActionListener(new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent actionEvent) {
-			updateImage();
+			update();
 		}
 	});
 	back.addActionListener(new ActionListener() {
@@ -53,90 +54,6 @@ private Client() {
 			}
 		}
 	});
-}
-
-private void updateImage() {
-	new Thread(new Runnable() {
-		@Override
-		public void run() {
-			images = new ArrayList<BufferedImage>();
-			((CardLayout) cards.getLayout()).show(cards, "overview");
-			web.removeAll();
-			web.updateUI();
-			for(int i = 1; ; i += 2) {
-				final BufferedImage image = getImage(i);
-				if(image == null) break;
-				images.add(image);
-				JPanel panel = new JPanel();
-				panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-				panel.setBorder(new EtchedBorder());
-				JLabel label = new JLabel("Question " + i + ":");
-				panel.add(label);
-				panel.add(new JLabel(new ImageIcon(image)));
-				panel.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						super.mouseClicked(e);
-						((CardLayout) cards.getLayout()).show(cards, "gallery");
-						selectedImage = images.indexOf(image);
-						updateGallery();
-					}
-				});
-				web.add(panel);
-				web.updateUI();
-			}
-			gallery.removeAll();
-			for(final BufferedImage image : images) {
-				int width = gallery.getWidth() - 30;
-				int height = image.getHeight() * width / images.get(selectedImage).getWidth();
-				JLabel label = new JLabel(new ImageIcon(getScaledInstance(image, width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false)));
-				label.addMouseListener(new MouseAdapter() {
-					@Override
-					public void mouseClicked(MouseEvent e) {
-						super.mouseClicked(e);
-						selectedImage = images.indexOf(image);
-						updateGallery();
-					}
-				});
-				JPanel panel = new JPanel();
-				panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-				panel.setBorder(new EtchedBorder());
-				panel.add(new JLabel("Question " + (images.indexOf(image) * 2 + 1) + ":"));
-				panel.add(label);
-				gallery.add(panel);
-				gallery.updateUI();
-			}
-		}
-	}).start();
-}
-
-void updateGallery() {
-	questionImage.removeAll();
-	int width = questionImage.getWidth() - 30;
-	int height = images.get(selectedImage).getHeight() * width / images.get(selectedImage).getWidth();
-	questionImage.add(new JLabel(new ImageIcon(getScaledInstance(images.get(selectedImage), width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false))));
-	question.setText("Question " + (selectedImage  * 2 + 1));
-}
-
-private BufferedImage getImage(int i) {
-	String url = "http://c811114.r14.cf2.rackcdn.com/";
-	url += "se";
-	url += String.format("%2d", (Integer) chapter.getValue());
-	url += "" + (char) ('a' + (Integer) section.getValue() - 1);
-	url += "01";
-	url += String.format("%3d", i);
-	url += ".gif";
-	url = url.replaceAll(" ", "0");
-	System.out.println("Fetching " + url);
-	if(isValidURL(url))
-		try {
-			return ImageIO.read(new URL(url));
-		} catch(MalformedURLException e) {
-			e.printStackTrace();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	return null;
 }
 
 // Source: https://stackoverflow.com/questions/27215135/checking-to-see-if-a-url-exists-java
@@ -162,6 +79,95 @@ public static void main(String[] args) {
 	frame.setVisible(true);
 }
 
+// Updates the images
+private void update() {
+	new Thread(new Runnable() {
+		@Override
+		public void run() {
+			images = new ArrayList<BufferedImage>();
+			((CardLayout) cards.getLayout()).show(cards, "overview");
+			web.removeAll();
+			web.updateUI();
+			gallery.removeAll();
+			gallery.updateUI();
+			for(int i = 1; ; i += 2) {
+				final BufferedImage image = getImage(i);
+				if(image == null) break;
+				images.add(image);
+				JPanel overviewPanel = getImageCard(image, i);
+				overviewPanel.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						super.mouseClicked(e);
+						((CardLayout) cards.getLayout()).show(cards, "gallery");
+						selectedImage = images.indexOf(image);
+						updateGallery();
+					}
+				});
+				web.add(overviewPanel);
+				web.updateUI();
+
+				int width = gallery.getWidth() - 30;
+				int height = image.getHeight() * width / image.getWidth();
+				JPanel galleryPanel = getImageCard(getScaledInstance(image, width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false), i);
+				galleryPanel.addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						super.mouseClicked(e);
+						selectedImage = images.indexOf(image);
+						updateGallery();
+					}
+				});
+				gallery.add(galleryPanel);
+				gallery.updateUI();
+			}
+		}
+	}).start();
+}
+
+// Create an etched border and title around image
+private JPanel getImageCard(BufferedImage image, int num) {
+	JPanel panel = new JPanel();
+	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+	panel.setBorder(new EtchedBorder());
+	JLabel label = new JLabel("Question " + num + ":");
+	panel.add(label);
+	panel.add(new JLabel(new ImageIcon(image)));
+	return panel;
+}
+
+// Update image shown in the gallery view
+void updateGallery() {
+	questionImage.removeAll();
+	int width = questionImage.getWidth() - 30;
+	int height = images.get(selectedImage).getHeight() * width / images.get(selectedImage).getWidth();
+	questionImage.add(new JLabel(new ImageIcon(getScaledInstance(images.get(selectedImage), width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false))));
+	question.setText("Question " + (selectedImage * 2 + 1));
+}
+
+// Get image from server
+private BufferedImage getImage(int i) {
+	String url = "http://c811114.r14.cf2.rackcdn.com/";
+	url += "se";
+	url += String.format("%2d", (Integer) chapter.getValue());
+	url += "" + (char) ('a' + (Integer) section.getValue() - 1);
+	url += "01";
+	url += String.format("%3d", i);
+	url += ".gif";
+	url = url.replaceAll(" ", "0");
+	System.out.println("Fetching " + url);
+	if(isValidURL(url))
+		try {
+			return ImageIO.read(new URL(url));
+		} catch(MalformedURLException e) {
+			e.printStackTrace();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	return null;
+}
+
+// Set up custom LayoutManagers
 private void createUIComponents() {
 	web = new JPanel(new WrapLayout(WrapLayout.LEFT));
 	gallery = new JPanel();
@@ -174,7 +180,7 @@ public BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int t
 			           BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
 	BufferedImage ret = img;
 	int w, h;
-	if (higherQuality) {
+	if(higherQuality) {
 		// Use multi-step technique: start with original size, then
 		// scale down in multiple passes with drawImage()
 		// until the target size is reached
@@ -188,16 +194,16 @@ public BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int t
 	}
 
 	do {
-		if (higherQuality && w > targetWidth) {
+		if(higherQuality && w > targetWidth) {
 			w /= 2;
-			if (w < targetWidth) {
+			if(w < targetWidth) {
 				w = targetWidth;
 			}
 		}
 
-		if (higherQuality && h > targetHeight) {
+		if(higherQuality && h > targetHeight) {
 			h /= 2;
-			if (h < targetHeight) {
+			if(h < targetHeight) {
 				h = targetHeight;
 			}
 		}
@@ -209,7 +215,7 @@ public BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int t
 		g2.dispose();
 
 		ret = tmp;
-	} while (w != targetWidth || h != targetHeight);
+	} while(w != targetWidth || h != targetHeight);
 
 	return ret;
 }
