@@ -1,2 +1,10 @@
 A Better CalcChat client.
-View an entire chapter at once, and click any question to have it fill the screen- no more dealing with a little window and a broken scale slider
+
+Current features:
+- View the problems of an entire section at once
+- Zoom into problems much more than calcchat's web client
+
+Upcoming features:
+- Save images locally
+- Populate dropdowns of available chapters and sections
+- Support all of calcchat's textbooks
