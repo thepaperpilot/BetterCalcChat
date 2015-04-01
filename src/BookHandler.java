@@ -6,16 +6,23 @@ import java.util.ArrayList;
 
 class BookHandler extends DefaultHandler {
 
-final ArrayList<Chapter> chapters = new ArrayList<Chapter>();
+final ArrayList<Chapter> chapters = new ArrayList<>();
+private final Book book;
 private Chapter chapter;
 private Section section;
+
+public BookHandler(Book book) {
+	this.book = book;
+}
 
 /*
 	* Every time the parser encounters the beginning of a new element,
 	* it calls this method, which resets the string buffer
 	*/
 public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-	if(qName.equalsIgnoreCase("CHAPTER")) {
+	if(qName.equalsIgnoreCase("CHAPTERS")) {
+		book.setURL(attributes.getValue("SOLUTIONART"));
+	} else if(qName.equalsIgnoreCase("CHAPTER")) {
 		chapter = new Chapter();
 		chapter.setName(attributes.getValue("NAME"));
 	} else if(qName.equalsIgnoreCase("SECTION")) {
@@ -29,9 +36,7 @@ public void startElement(String uri, String localName, String qName, Attributes 
 /*
 	* When the parser encounters the end of an element, it calls this method
 	*/
-public void endElement(String uri, String localName, String qName)
-		throws SAXException {
-
+public void endElement(String uri, String localName, String qName) throws SAXException {
 	if(qName.equalsIgnoreCase("CHAPTER")) {
 		chapters.add(chapter);
 	} else if(qName.equalsIgnoreCase("SECTION")) {

@@ -10,7 +10,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 
@@ -18,7 +17,6 @@ class Client {
 
 private JPanel panel;
 private JPanel web;
-private JComboBox bookSelector;
 private JComboBox sectionSelector;
 private JComboBox chapterSelector;
 private JScrollPane pane;
@@ -30,10 +28,14 @@ private JPanel questionImage;
 private JScrollPane pane2;
 private JPanel gallery;
 private JScrollPane galleryPane;
+private JButton bookButton;
+private JLabel chapterLabel;
+private JLabel sectionLabel;
 
 private ArrayList<BufferedImage> images;
 private int selectedImage;
 private BookHandler handler;
+private Book book;
 private Chapter chapter;
 private Section section;
 
@@ -41,6 +43,14 @@ private Client() {
 	pane.getVerticalScrollBar().setUnitIncrement(16);
 	pane2.getVerticalScrollBar().setUnitIncrement(16);
 	galleryPane.getVerticalScrollBar().setUnitIncrement(16);
+	bookButton.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			BookSelector dialog = new BookSelector(Client.this);
+			dialog.pack();
+			dialog.setVisible(true);
+		}
+	});
 	goButton.addActionListener(new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent actionEvent) {
@@ -84,13 +94,18 @@ private Client() {
 		@Override
 		public void componentResized(ComponentEvent e) {
 			panel.updateUI();
+			updateGallery();
 		}
 	});
-	try {
-		readBook(new URL("http://www.calcchat.com/xml/calc_8e_chapters.xml"));
-	} catch(MalformedURLException e) {
-		e.printStackTrace();
-	}
+}
+
+public static void main(String[] args) {
+	JFrame frame = new JFrame("A Better CalcChat Client");
+	frame.setContentPane(new Client().panel);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setMinimumSize(new Dimension(720, 640));
+	frame.pack();
+	frame.setVisible(true);
 }
 
 // Updates the images
@@ -98,7 +113,7 @@ private void update() {
 	new Thread(new Runnable() {
 		@Override
 		public void run() {
-			images = new ArrayList<BufferedImage>();
+			images = new ArrayList<>();
 			((CardLayout) cards.getLayout()).show(cards, "overview");
 			web.removeAll();
 			web.updateUI();
@@ -139,12 +154,13 @@ private void update() {
 	}).start();
 }
 
-void readBook(URL book) {
+void readBook(Book book) {
 	try {
-		handler = new BookHandler();
+		this.book = book;
+		handler = new BookHandler(book);
 		XMLReader myReader = XMLReaderFactory.createXMLReader();
 		myReader.setContentHandler(handler);
-		myReader.parse(new InputSource(book.openStream()));
+		myReader.parse(new InputSource(book.xmlUrl.openStream()));
 		System.out.println("Found " + handler.chapters.size() + " chapters:");
 		for(Chapter chapter : handler.chapters)
 			System.out.println(chapter);
@@ -156,26 +172,25 @@ void readBook(URL book) {
 			chapterSelector.addItem(chapter.name);
 		for(Section section : chapter.sections)
 			sectionSelector.addItem(section.name);
-	} catch(SAXException e) {
-		e.printStackTrace();
-	} catch(MalformedURLException e) {
-		e.printStackTrace();
-	} catch(IOException e) {
+		chapterLabel.setVisible(true);
+		chapterSelector.setVisible(true);
+		sectionLabel.setVisible(true);
+		sectionSelector.setVisible(true);
+		goButton.setVisible(true);
+	} catch(SAXException | IOException e) {
 		e.printStackTrace();
 	}
 }
 
 // Get image from server
 private BufferedImage getImage(int i) {
-	String url = "http://c811114.r14.cf2.rackcdn.com/";
+	String url = book.imageUrl;
 	url += section.pre;
 	url += String.format("%3d", i).replaceAll(" ", "0");
 	url += ".gif";
 	System.out.println("Fetching " + url);
 	try {
 		return ImageIO.read(new URL(url));
-	} catch(MalformedURLException e) {
-		e.printStackTrace();
 	} catch(IOException e) {
 		e.printStackTrace();
 	}
@@ -215,15 +230,6 @@ BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int targetHe
 	g2.drawImage(img, 0, 0, w, h, null);
 	g2.dispose();
 	return tmp;
-}
-
-public static void main(String[] args) {
-	JFrame frame = new JFrame("A Better CalcChat Client");
-	frame.setContentPane(new Client().panel);
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setMinimumSize(new Dimension(720, 640));
-	frame.pack();
-	frame.setVisible(true);
 }
 
 // Set up custom LayoutManagers
