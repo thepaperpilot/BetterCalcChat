@@ -12,7 +12,6 @@ Current features:
 
 Upcoming features:
 - Add precal and applied textbooks
-- Add download progress bar
 - Save images locally
 - Chrome extenstion? Greasemonkey script? Android app?
 

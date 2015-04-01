@@ -31,6 +31,9 @@ private JScrollPane galleryPane;
 private JButton bookButton;
 private JLabel chapterLabel;
 private JLabel sectionLabel;
+private JProgressBar downloadingBar;
+private JLabel downloadingLabel;
+private JPanel downloadingPanel;
 
 private ArrayList<BufferedImage> images;
 private int selectedImage;
@@ -115,6 +118,10 @@ private void update() {
 	new Thread(new Runnable() {
 		@Override
 		public void run() {
+			downloadingBar.setMaximum(section.lastProblem);
+			downloadingLabel.setText("Downloading problem 0 out of " + section.lastProblem);
+			downloadingBar.setValue(0);
+			downloadingPanel.setVisible(true);
 			images = new ArrayList<>();
 			((CardLayout) cards.getLayout()).show(cards, "overview");
 			web.removeAll();
@@ -123,6 +130,8 @@ private void update() {
 			gallery.updateUI();
 
 			for(int i = 1; i <= section.lastProblem; i += 2) {
+				downloadingLabel.setText("Downloading problem " + i + " out of " + section.lastProblem);
+				downloadingBar.setValue(i);
 				final BufferedImage image = getImage(i);
 				images.add(image);
 				JPanel overviewPanel = getImageCard(image, i);
@@ -153,6 +162,7 @@ private void update() {
 				gallery.add(galleryPanel);
 				gallery.updateUI();
 			}
+			downloadingPanel.setVisible(false);
 		}
 	}).start();
 }
@@ -200,6 +210,8 @@ private BufferedImage getImage(int i) {
 		return ImageIO.read(new URL(url));
 	} catch(IOException e) {
 		e.printStackTrace();
+		((CardLayout) cards.getLayout()).show(cards, "startup");
+		downloadingPanel.setVisible(false);
 	}
 	return null;
 }
