@@ -5,15 +5,6 @@ import java.awt.*;
  * FlowLayout subclass that fully supports wrapping of components.
  */
 class WrapLayout extends FlowLayout {
-private Dimension preferredLayoutSize;
-
-/**
- * Constructs a new <code>WrapLayout</code> with a left
- * alignment and a default 5-unit horizontal and vertical gap.
- */
-public WrapLayout() {
-	super();
-}
 
 /**
  * Constructs a new <code>FlowLayout</code> with the specified
@@ -21,11 +12,9 @@ public WrapLayout() {
  * The value of the alignment argument must be one of
  * <code>WrapLayout</code>, <code>WrapLayout</code>,
  * or <code>WrapLayout</code>.
- *
- * @param align the alignment value
  */
-public WrapLayout(int align) {
-	super(align);
+public WrapLayout() {
+	super(FlowLayout.LEFT);
 }
 
 /**

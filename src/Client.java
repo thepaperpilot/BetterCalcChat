@@ -1,3 +1,8 @@
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.xml.sax.XMLReader;
+import org.xml.sax.helpers.XMLReaderFactory;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
@@ -5,7 +10,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,9 +18,9 @@ class Client {
 
 private JPanel panel;
 private JPanel web;
-private JComboBox book;
-private JSpinner section;
-private JSpinner chapter;
+private JComboBox bookSelector;
+private JComboBox sectionSelector;
+private JComboBox chapterSelector;
 private JScrollPane pane;
 private JPanel cards;
 private JButton goButton;
@@ -29,6 +33,9 @@ private JScrollPane galleryPane;
 
 private ArrayList<BufferedImage> images;
 private int selectedImage;
+private BookHandler handler;
+private Chapter chapter;
+private Section section;
 
 private Client() {
 	pane.getVerticalScrollBar().setUnitIncrement(16);
@@ -46,37 +53,44 @@ private Client() {
 			((CardLayout) cards.getLayout()).show(cards, "overview");
 		}
 	});
-	pane2.addComponentListener(new ComponentAdapter() {
+	chapterSelector.addActionListener(new ActionListener() {
 		@Override
-		public void componentResized(ComponentEvent e) {
-			if(images != null) {
-				updateGallery();
+		public void actionPerformed(ActionEvent actionEvent) {
+			for(Chapter chapter : handler.chapters) {
+				if(chapter.name == chapterSelector.getSelectedItem()) {
+					Client.this.chapter = chapter;
+					Client.this.section = chapter.sections.get(0);
+					sectionSelector.removeAllItems();
+					for(Section section : chapter.sections) {
+						sectionSelector.addItem(section.name);
+					}
+					break;
+				}
 			}
 		}
 	});
-}
-
-// Source: https://stackoverflow.com/questions/27215135/checking-to-see-if-a-url-exists-java
-private static boolean isValidURL(String mURL) {
+	sectionSelector.addActionListener(new ActionListener() {
+		@Override
+		public void actionPerformed(ActionEvent actionEvent) {
+			for(Section section : chapter.sections) {
+				if(section.name == sectionSelector.getSelectedItem()) {
+					Client.this.section = section;
+					break;
+				}
+			}
+		}
+	});
+	panel.addComponentListener(new ComponentAdapter() {
+		@Override
+		public void componentResized(ComponentEvent e) {
+			panel.updateUI();
+		}
+	});
 	try {
-		final URL url = new URL(mURL);
-		HttpURLConnection con = (HttpURLConnection) url.openConnection();
-		con.setRequestMethod("HEAD");
-		int responseCode = con.getResponseCode();
-		return (responseCode == 200);
-	} catch(Exception e) {
-		System.err.println("Invalid URL");
-		return false;
+		readBook(new URL("http://www.calcchat.com/xml/calc_8e_chapters.xml"));
+	} catch(MalformedURLException e) {
+		e.printStackTrace();
 	}
-}
-
-public static void main(String[] args) {
-	JFrame frame = new JFrame("A Better CalcChat Client");
-	frame.setContentPane(new Client().panel);
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setMinimumSize(new Dimension(720, 640));
-	frame.pack();
-	frame.setVisible(true);
 }
 
 // Updates the images
@@ -90,9 +104,8 @@ private void update() {
 			web.updateUI();
 			gallery.removeAll();
 			gallery.updateUI();
-			for(int i = 1; ; i += 2) {
+			for(int i = 1; i <= section.lastProblem; i += 2) {
 				final BufferedImage image = getImage(i);
-				if(image == null) break;
 				images.add(image);
 				JPanel overviewPanel = getImageCard(image, i);
 				overviewPanel.addMouseListener(new MouseAdapter() {
@@ -100,6 +113,7 @@ private void update() {
 					public void mouseClicked(MouseEvent e) {
 						super.mouseClicked(e);
 						((CardLayout) cards.getLayout()).show(cards, "gallery");
+						cards.updateUI();
 						selectedImage = images.indexOf(image);
 						updateGallery();
 					}
@@ -109,7 +123,7 @@ private void update() {
 
 				int width = gallery.getWidth() - 30;
 				int height = image.getHeight() * width / image.getWidth();
-				JPanel galleryPanel = getImageCard(getScaledInstance(image, width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false), i);
+				JPanel galleryPanel = getImageCard(getScaledInstance(image, width, height), i);
 				galleryPanel.addMouseListener(new MouseAdapter() {
 					@Override
 					public void mouseClicked(MouseEvent e) {
@@ -123,6 +137,49 @@ private void update() {
 			}
 		}
 	}).start();
+}
+
+void readBook(URL book) {
+	try {
+		handler = new BookHandler();
+		XMLReader myReader = XMLReaderFactory.createXMLReader();
+		myReader.setContentHandler(handler);
+		myReader.parse(new InputSource(book.openStream()));
+		System.out.println("Found " + handler.chapters.size() + " chapters:");
+		for(Chapter chapter : handler.chapters)
+			System.out.println(chapter);
+		chapter = handler.chapters.get(0);
+		section = chapter.sections.get(0);
+		chapterSelector.removeAllItems();
+		sectionSelector.removeAllItems();
+		for(Chapter chapter : handler.chapters)
+			chapterSelector.addItem(chapter.name);
+		for(Section section : chapter.sections)
+			sectionSelector.addItem(section.name);
+	} catch(SAXException e) {
+		e.printStackTrace();
+	} catch(MalformedURLException e) {
+		e.printStackTrace();
+	} catch(IOException e) {
+		e.printStackTrace();
+	}
+}
+
+// Get image from server
+private BufferedImage getImage(int i) {
+	String url = "http://c811114.r14.cf2.rackcdn.com/";
+	url += section.pre;
+	url += String.format("%3d", i).replaceAll(" ", "0");
+	url += ".gif";
+	System.out.println("Fetching " + url);
+	try {
+		return ImageIO.read(new URL(url));
+	} catch(MalformedURLException e) {
+		e.printStackTrace();
+	} catch(IOException e) {
+		e.printStackTrace();
+	}
+	return null;
 }
 
 // Create an etched border and title around image
@@ -141,82 +198,38 @@ void updateGallery() {
 	questionImage.removeAll();
 	int width = questionImage.getWidth() - 30;
 	int height = images.get(selectedImage).getHeight() * width / images.get(selectedImage).getWidth();
-	questionImage.add(new JLabel(new ImageIcon(getScaledInstance(images.get(selectedImage), width, height, RenderingHints.VALUE_INTERPOLATION_BILINEAR, false))));
+	questionImage.add(new JLabel(new ImageIcon(getScaledInstance(images.get(selectedImage), width, height))));
 	question.setText("Question " + (selectedImage * 2 + 1));
 }
 
-// Get image from server
-private BufferedImage getImage(int i) {
-	String url = "http://c811114.r14.cf2.rackcdn.com/";
-	url += "se";
-	url += String.format("%2d", (Integer) chapter.getValue());
-	url += "" + (char) ('a' + (Integer) section.getValue() - 1);
-	url += "01";
-	url += String.format("%3d", i);
-	url += ".gif";
-	url = url.replaceAll(" ", "0");
-	System.out.println("Fetching " + url);
-	if(isValidURL(url))
-		try {
-			return ImageIO.read(new URL(url));
-		} catch(MalformedURLException e) {
-			e.printStackTrace();
-		} catch(IOException e) {
-			e.printStackTrace();
-		}
-	return null;
+// Source: https://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
+BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int targetHeight) {
+	int type = (img.getTransparency() == Transparency.OPAQUE) ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+	int w, h;
+	w = targetWidth;
+	h = targetHeight;
+
+	BufferedImage tmp = new BufferedImage(w, h, type);
+	Graphics2D g2 = tmp.createGraphics();
+	g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+	g2.drawImage(img, 0, 0, w, h, null);
+	g2.dispose();
+	return tmp;
+}
+
+public static void main(String[] args) {
+	JFrame frame = new JFrame("A Better CalcChat Client");
+	frame.setContentPane(new Client().panel);
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setMinimumSize(new Dimension(720, 640));
+	frame.pack();
+	frame.setVisible(true);
 }
 
 // Set up custom LayoutManagers
 private void createUIComponents() {
-	web = new JPanel(new WrapLayout(WrapLayout.LEFT));
+	web = new JPanel(new WrapLayout());
 	gallery = new JPanel();
 	gallery.setLayout(new BoxLayout(gallery, BoxLayout.Y_AXIS));
-}
-
-// Source: https://today.java.net/pub/a/today/2007/04/03/perils-of-image-getscaledinstance.html
-public BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int targetHeight, Object hint, boolean higherQuality) {
-	int type = (img.getTransparency() == Transparency.OPAQUE) ?
-			           BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
-	BufferedImage ret = img;
-	int w, h;
-	if(higherQuality) {
-		// Use multi-step technique: start with original size, then
-		// scale down in multiple passes with drawImage()
-		// until the target size is reached
-		w = img.getWidth();
-		h = img.getHeight();
-	} else {
-		// Use one-step technique: scale directly from original
-		// size to target size with a single drawImage() call
-		w = targetWidth;
-		h = targetHeight;
-	}
-
-	do {
-		if(higherQuality && w > targetWidth) {
-			w /= 2;
-			if(w < targetWidth) {
-				w = targetWidth;
-			}
-		}
-
-		if(higherQuality && h > targetHeight) {
-			h /= 2;
-			if(h < targetHeight) {
-				h = targetHeight;
-			}
-		}
-
-		BufferedImage tmp = new BufferedImage(w, h, type);
-		Graphics2D g2 = tmp.createGraphics();
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, hint);
-		g2.drawImage(ret, 0, 0, w, h, null);
-		g2.dispose();
-
-		ret = tmp;
-	} while(w != targetWidth || h != targetHeight);
-
-	return ret;
 }
 }

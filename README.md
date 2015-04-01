@@ -6,5 +6,4 @@ Current features:
 
 Upcoming features:
 - Save images locally
-- Populate dropdowns of available chapters and sections
 - Support all of calcchat's textbooks
