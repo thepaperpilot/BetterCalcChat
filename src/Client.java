@@ -43,6 +43,7 @@ private Client() {
 	pane.getVerticalScrollBar().setUnitIncrement(16);
 	pane2.getVerticalScrollBar().setUnitIncrement(16);
 	galleryPane.getVerticalScrollBar().setUnitIncrement(16);
+
 	bookButton.addActionListener(new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent actionEvent) {
@@ -90,6 +91,7 @@ private Client() {
 			}
 		}
 	});
+
 	panel.addComponentListener(new ComponentAdapter() {
 		@Override
 		public void componentResized(ComponentEvent e) {
@@ -119,6 +121,7 @@ private void update() {
 			web.updateUI();
 			gallery.removeAll();
 			gallery.updateUI();
+
 			for(int i = 1; i <= section.lastProblem; i += 2) {
 				final BufferedImage image = getImage(i);
 				images.add(image);
@@ -161,9 +164,11 @@ void readBook(Book book) {
 		XMLReader myReader = XMLReaderFactory.createXMLReader();
 		myReader.setContentHandler(handler);
 		myReader.parse(new InputSource(book.xmlUrl.openStream()));
+
 		System.out.println("Found " + handler.chapters.size() + " chapters:");
 		for(Chapter chapter : handler.chapters)
 			System.out.println(chapter);
+
 		chapter = handler.chapters.get(0);
 		section = chapter.sections.get(0);
 		chapterSelector.removeAllItems();
@@ -172,6 +177,7 @@ void readBook(Book book) {
 			chapterSelector.addItem(chapter.name);
 		for(Section section : chapter.sections)
 			sectionSelector.addItem(section.name);
+
 		chapterLabel.setVisible(true);
 		chapterSelector.setVisible(true);
 		sectionLabel.setVisible(true);
@@ -188,6 +194,7 @@ private BufferedImage getImage(int i) {
 	url += section.pre;
 	url += String.format("%3d", i).replaceAll(" ", "0");
 	url += ".gif";
+
 	System.out.println("Fetching " + url);
 	try {
 		return ImageIO.read(new URL(url));
@@ -202,6 +209,7 @@ private JPanel getImageCard(BufferedImage image, int num) {
 	JPanel panel = new JPanel();
 	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 	panel.setBorder(new EtchedBorder());
+
 	JLabel label = new JLabel("Question " + num + ":");
 	panel.add(label);
 	panel.add(new JLabel(new ImageIcon(image)));
