@@ -11,9 +11,11 @@ Current features:
 - Zoom into problems much more than calcchat's web client
 
 Upcoming features:
+- Better layout (look for empty spaces, searching left to right)
+- Animate images in as they load (fade in and move up, animation reference: http://docs.oracle.com/javase/tutorial/uiswing/misc/timer.html)
 - Add precal and applied textbooks
 - Save images locally
-- Chrome extenstion? Greasemonkey script? Android app?
+- Browser extensions? Greasemonkey script? Android app?
 
 Screenshots:
 ![Book Selector](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Screenshot%20-%2004012015%20-%2007:22:35%20AM.png)
