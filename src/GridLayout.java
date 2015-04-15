@@ -1,22 +1,25 @@
 import java.awt.*;
+import java.util.ArrayList;
 
 class GridLayout implements LayoutManager {
 
 private final int hgap;
 private final int vgap;
-private final int gridSize;
-private final int minWidth;
+private final int cellWidth;
+private final int cellHeight;
+private final ArrayList<boolean[]> cells = new ArrayList<>();
+
 private Dimension dim;
 
-public GridLayout() {
-	this(5, 5, 10, 357);
+public GridLayout(int cellWidth, int cellHeight) {
+	this(5, 5, cellWidth, cellHeight);
 }
 
-public GridLayout(int hgap, int vgap, int gridSize, int minWidth) {
+public GridLayout(int hgap, int vgap, int cellWidth, int cellHeight) {
 	this.hgap = hgap;
 	this.vgap = vgap;
-	this.gridSize = gridSize;
-	this.minWidth = minWidth;
+	this.cellWidth = cellWidth;
+	this.cellHeight = cellHeight;
 }
 
 @Override
@@ -52,10 +55,8 @@ public void layoutContainer(Container target) {
 		int maxWidth = target.getWidth() - (insets.left + insets.right + this.hgap * 2);
 		int members = target.getComponentCount();
 
-		int x = insets.left + hgap;
-		int y = insets.top + vgap;
-		int lowY = y;
-		int highY = y;
+		int y = 0;
+		int x = 0;
 
 		outer:
 		for(int i = 0; i < members; ++i) {
@@ -63,37 +64,46 @@ public void layoutContainer(Container target) {
 			if(m.isVisible()) {
 				Dimension d = m.getPreferredSize();
 				m.setSize(d.width, d.height);
+				int cellsWide = (int) Math.ceil(d.width / (float) cellWidth);
 
-				while(true) {
-					row:
-					while(x < maxWidth - d.width) {
-						for(int j = 0; j < i; j++) {
-							Component com = target.getComponent(j);
-							Rectangle bounds = com.getBounds();
-							bounds.width = Math.max(bounds.width, minWidth);
-							if(bounds.intersects(x, y, d.width + hgap * 2, d.height + vgap * 2)) {
-								x = bounds.x + bounds.width;
-								while((x - insets.left) % gridSize != 0) x++;
-								continue row;
+				inner: while(true) {
+					while(cells.size() < y + 1)
+						cells.add(new boolean[getCellsWide(maxWidth)]);
+					for(; x <= cells.get(y).length - cellsWide; x++) {
+						for(int k = 0; k < cellsWide; k++) {
+							if(cells.get(y)[x]) continue inner;
+							if(k == cellsWide - 1) {
+								int extraWidth = d.width - (cellsWide - 1) * cellWidth;
+								int marginWidth = maxWidth - getCellsWide(maxWidth);
+								if(extraWidth > marginWidth)
+									continue inner;
 							}
 						}
-						m.setLocation(x + hgap, y + vgap);
-						x += d.width + hgap;
-						while((x - insets.left) % gridSize != 0) x++;
-						if(lowY > m.getY() + m.getHeight())
-							lowY = m.getY() + m.getHeight();
-						highY = Math.max(highY, y + d.height);
+						//place
+						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));
+						for(int j = y; j < y + getCellsTall(d.height); j++) {
+							for(int k = x; k < x + cellsWide; k++) {
+								while(cells.size() < j + 1)
+									cells.add(new boolean[getCellsWide(maxWidth)]);
+								cells.get(j)[k] = true;
+							}
+						}
 						continue outer;
 					}
-					x = insets.left + hgap;
-					if(y == lowY) y = lowY + 1;
-					else y = lowY;
-					while((y - insets.top) % gridSize != 0) y++;
-					lowY = y;
+					y++;
+					x = 0;
 				}
 			}
 		}
-		dim = new Dimension(maxWidth, highY + vgap);
+		dim = new Dimension(maxWidth, cells.size() * cellHeight + vgap * 2);
 	}
+}
+
+private int getCellsWide(int width) {
+	return (int) Math.ceil(width / (float) cellWidth);
+}
+
+private int getCellsTall(int height) {
+	return (int) Math.ceil(height / (float) cellHeight);
 }
 }
