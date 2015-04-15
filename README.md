@@ -11,13 +11,14 @@ Current features:
 - Zoom into problems much more than calcchat's web client
 
 Upcoming features:
-- Better layout (look for empty spaces, searching left to right)
+- Continue improving the layout manager
 - Animate images in as they load (fade in and move up, animation reference: http://docs.oracle.com/javase/tutorial/uiswing/misc/timer.html)
 - Add precal and applied textbooks
 - Save images locally
 - Browser extensions? Greasemonkey script? Android app?
 
 Screenshots:
+Note: I'm using linux, and have a GTK+ theme applied to my java applications. The program uses your system's default LaF.
 ![Book Selector](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Screenshot%20-%2004012015%20-%2007:22:35%20AM.png)
-![Overview Mode](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Screenshot%20-%2004012015%20-%2007:24:33%20AM.png)
+![Overview Mode](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Screenshot%20-%2004142015%20-%2009:07:30%20PM.png)
 ![Gallery Mode](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Screenshot%20-%2004012015%20-%2007:24:45%20AM.png)
