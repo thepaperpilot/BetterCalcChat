@@ -53,10 +53,12 @@ public void layoutContainer(Container target) {
 	synchronized(target.getTreeLock()) {
 		Insets insets = target.getInsets();
 		int maxWidth = target.getWidth() - (insets.left + insets.right + this.hgap * 2);
+		int maxCells = (int) Math.ceil(maxWidth / (float) cellWidth);
 		int members = target.getComponentCount();
 
 		int y = 0;
 		int x = 0;
+		cells.clear();
 
 		outer:
 		for(int i = 0; i < members; ++i) {
@@ -65,26 +67,44 @@ public void layoutContainer(Container target) {
 				Dimension d = m.getPreferredSize();
 				m.setSize(d.width, d.height);
 				int cellsWide = (int) Math.ceil(d.width / (float) cellWidth);
+				int cellsTall = (int) Math.ceil(d.height / (float) cellHeight);
 
-				inner: while(true) {
+				while(true) {
+					if(cellsWide >= maxCells) {
+						y++;
+						x = 0;
+						//place
+						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));
+						for(int j = y; j < y + cellsTall; j++) {
+							for(int k = x; k < x + cellsWide && k <= maxCells; k++) {
+								while(cells.size() < j + 1)
+									cells.add(new boolean[maxCells]);
+								cells.get(j)[k] = true;
+							}
+						}
+						continue outer;
+					}
+
 					while(cells.size() < y + 1)
-						cells.add(new boolean[getCellsWide(maxWidth)]);
-					for(; x <= cells.get(y).length - cellsWide; x++) {
-						for(int k = 0; k < cellsWide; k++) {
-							if(cells.get(y)[x]) continue inner;
-							if(k == cellsWide - 1) {
+						cells.add(new boolean[maxCells]);
+
+					inner: for(; x <= cells.get(y).length - cellsWide; x++) {
+						for(int k = x; k < x + cellsWide; k++) {
+							if(cells.get(y)[k])
+								continue inner;
+							if(k == maxCells - 1) {
 								int extraWidth = d.width - (cellsWide - 1) * cellWidth;
-								int marginWidth = maxWidth - getCellsWide(maxWidth);
+								int marginWidth = maxWidth - maxCells * cellWidth;
 								if(extraWidth > marginWidth)
 									continue inner;
 							}
 						}
 						//place
 						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));
-						for(int j = y; j < y + getCellsTall(d.height); j++) {
+						for(int j = y; j < y + cellsTall; j++) {
 							for(int k = x; k < x + cellsWide; k++) {
 								while(cells.size() < j + 1)
-									cells.add(new boolean[getCellsWide(maxWidth)]);
+									cells.add(new boolean[maxCells]);
 								cells.get(j)[k] = true;
 							}
 						}
@@ -95,15 +115,7 @@ public void layoutContainer(Container target) {
 				}
 			}
 		}
-		dim = new Dimension(maxWidth, cells.size() * cellHeight + vgap * 2);
+		dim = new Dimension(maxWidth, cells.size() * (cellHeight + vgap) + vgap * 2);
 	}
-}
-
-private int getCellsWide(int width) {
-	return (int) Math.ceil(width / (float) cellWidth);
-}
-
-private int getCellsTall(int height) {
-	return (int) Math.ceil(height / (float) cellHeight);
 }
 }

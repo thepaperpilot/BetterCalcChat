@@ -222,7 +222,10 @@ private JPanel getImageCard(BufferedImage image, int num) {
 	panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 	panel.setBorder(new EtchedBorder());
 
-	JLabel label = new JLabel("Question " + num + ":");
+	JLabel label = new JLabel(" Question " + num + ":");
+	Font font = label.getFont();
+	font = new Font(font.getFontName(), Font.BOLD, font.getSize());
+	label.setFont(font);
 	panel.add(label);
 	panel.add(new JLabel(new ImageIcon(image)));
 	return panel;
@@ -230,6 +233,8 @@ private JPanel getImageCard(BufferedImage image, int num) {
 
 // Update image shown in the gallery view
 void updateGallery() {
+	if(images == null)
+		return;
 	questionImage.removeAll();
 	int width = questionImage.getWidth() - 30;
 	int height = images.get(selectedImage).getHeight() * width / images.get(selectedImage).getWidth();
@@ -254,7 +259,7 @@ BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int targetHe
 
 // Set up custom LayoutManagers
 private void createUIComponents() {
-	web = new JPanel(new GridLayout(357, 457));
+	web = new JPanel(new GridLayout(180, 50));
 	gallery = new JPanel();
 	gallery.setLayout(new BoxLayout(gallery, BoxLayout.Y_AXIS));
 }
