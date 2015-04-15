@@ -4,15 +4,17 @@ class GridLayout implements LayoutManager {
 
 private final int hgap;
 private final int vgap;
+private final int gridSize;
 private Dimension dim;
 
 public GridLayout() {
-	this(5, 5);
+	this(5, 5, 10);
 }
 
-public GridLayout(int hgap, int vgap) {
+public GridLayout(int hgap, int vgap, int gridSize) {
 	this.hgap = hgap;
 	this.vgap = vgap;
+	this.gridSize = gridSize;
 }
 
 @Override
@@ -67,19 +69,23 @@ public void layoutContainer(Container target) {
 							Component com = target.getComponent(j);
 							if(com.getBounds().intersects(x, y, d.width + hgap * 2, d.height + vgap * 2)) {
 								x = com.getX() + com.getWidth();
+								while((x - insets.left) % gridSize != 0) x++;
 								continue row;
 							}
 						}
 						m.setLocation(x + hgap, y + vgap);
 						x += d.width + hgap;
+						while((x - insets.left) % gridSize != 0) x++;
 						if(lowY > m.getY() + m.getHeight())
 							lowY = m.getY() + m.getHeight();
 						highY = Math.max(highY, y + d.height);
 						continue outer;
 					}
-					if(y == lowY) y = lowY++;
-					else y = lowY;
 					x = insets.left + hgap;
+					if(y == lowY) y = lowY + 1;
+					else y = lowY;
+					while((y - insets.top) % gridSize != 0) y++;
+					lowY = y;
 				}
 			}
 		}
