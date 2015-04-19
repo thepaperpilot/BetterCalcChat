@@ -1,6 +1,6 @@
 A Better CalcChat client.
 
-[Download Client! (.jar)](https://drive.google.com/file/d/0B4xCmMA9eS2jZXhzcHpDc25zdzQ/view?usp=sharing)
+Download the client on [the releases page](https://github.com/thepaperpilot/BetterCalcChat/releases)
 
 Note: This is a stand-alone application. 
 If you'd prefer to stay within your browser, there is [this very nice chrome extension by Hardy Creations](https://chrome.google.com/webstore/detail/calc-chat-cleanup/ghbaoonbpgameecbhgmlcomljjdikbln?hl=en-US). 
