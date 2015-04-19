@@ -67,7 +67,7 @@ public void layoutContainer(Container target) {
 				Dimension d = m.getPreferredSize();
 				m.setSize(d.width, d.height);
 				int cellsWide = (int) Math.ceil(d.width / (float) cellWidth);
-				int cellsTall = (int) Math.ceil(d.height / (float) cellHeight);
+				int cellsTall = Math.round(d.height / (float) cellHeight);
 
 				while(true) {
 					if(cellsWide >= maxCells) {
