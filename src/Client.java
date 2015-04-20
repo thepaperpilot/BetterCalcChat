@@ -203,15 +203,18 @@ private BufferedImage getImage(int i) {
 	String url = book.imageUrl;
 	url += section.pre;
 	url += String.format("%3d", i).replaceAll(" ", "0");
-	url += ".gif";
 
 	System.out.println("Fetching " + url);
 	try {
-		return ImageIO.read(new URL(url));
-	} catch(IOException e) {
-		e.printStackTrace();
-		((CardLayout) cards.getLayout()).show(cards, "startup");
-		downloadingPanel.setVisible(false);
+		return ImageIO.read(new URL(url + ".gif"));
+	} catch(IOException ignored) {
+		try {
+			return ImageIO.read(new URL(url + ".png"));
+		} catch(IOException e) {
+			e.printStackTrace();
+			((CardLayout) cards.getLayout()).show(cards, "startup");
+			downloadingPanel.setVisible(false);
+		}
 	}
 	return null;
 }
