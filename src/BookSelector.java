@@ -16,7 +16,7 @@ public BookSelector(Client client) {
 	setContentPane(contentPane);
 	setModal(true);
 	getRootPane().setDefaultButton(buttonOK);
-	setMinimumSize(new Dimension(400, 240));
+	setMinimumSize(new Dimension(600, 240));
 
 	buttonOK.addActionListener(new ActionListener() {
 		public void actionPerformed(ActionEvent e) {
