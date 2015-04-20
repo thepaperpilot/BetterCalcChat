@@ -14,6 +14,7 @@ This client is superior to the calcchat website because it can:
 Screenshots:
 _(Note: I'm using linux, and have a GTK+ theme applied to my java applications. The program uses your system's default LaF.)_
 ![Book Selector](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Book%20Selector.png)
-![Overview Mode](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Overview%20Mode.png)
+![Overview Mode Windowed](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Overview%20Mode%20Windowed.png)
+![Overview Mode Fullscreen](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Overview%20Mode%20Fullscreen.png)
 ![Gallery Mode Windowed](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Gallery%20Mode%20Windowed.png)
 ![Gallery Mode Fullscreen](https://github.com/thepaperpilot/BetterCalcChat/raw/master/screenshots/Gallery%20Mode%20Fullscreen.png)
