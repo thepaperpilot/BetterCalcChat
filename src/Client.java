@@ -242,6 +242,7 @@ void updateGallery() {
 	int width = questionImage.getWidth() - 30;
 	int height = images.get(selectedImage).getHeight() * width / images.get(selectedImage).getWidth();
 	questionImage.add(new JLabel(new ImageIcon(getScaledInstance(images.get(selectedImage), width, height))));
+	questionImage.updateUI();
 	question.setText("Question " + (selectedImage * 2 + 1));
 }
 
