@@ -158,12 +158,11 @@ private Client() {
     calculusButton.setSelected(true);
     updateBooks();
 
-	panel.addComponentListener(new ComponentAdapter() {
+	questionImage.addComponentListener(new ComponentAdapter() {
 		@Override
 		public void componentResized(ComponentEvent e) {
-			panel.updateUI();
 			updateGallery();
-		}
+        }
 	});
 }
 
