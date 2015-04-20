@@ -76,7 +76,7 @@ public void layoutContainer(Container target) {
 						//place
 						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));
 						for(int j = y; j < y + cellsTall; j++) {
-							for(int k = x; k < x + cellsWide && k <= maxCells; k++) {
+							for(int k = x; k < x + cellsWide && k < maxCells; k++) {
 								while(cells.size() < j + 1)
 									cells.add(new boolean[maxCells]);
 								cells.get(j)[k] = true;
