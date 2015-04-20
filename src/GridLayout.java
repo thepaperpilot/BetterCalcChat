@@ -137,7 +137,7 @@ public void layoutContainer(Container target) {
 				}
 			}
 		}
-		dim = new Dimension(maxWidth, cells.size() * (cellHeight + vgap) + vgap * 2);
+		dim = new Dimension(maxWidth, (cells.size() + 1) * (cellHeight + vgap) + vgap * 2);
 	}
 }
 }
