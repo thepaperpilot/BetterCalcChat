@@ -35,6 +35,14 @@ private JLabel sectionLabel;
 private JProgressBar downloadingBar;
 private JLabel downloadingLabel;
 private JPanel downloadingPanel;
+private JButton selectBookButton;
+private JButton prevBook;
+private JButton nextBook;
+private JComboBox books;
+private JPanel cover;
+private JRadioButton calculusButton;
+private JRadioButton precalculusButton;
+private JRadioButton appliedSeriesButton;
 
 private ArrayList<BufferedImage> images;
 private int selectedImage;
@@ -51,9 +59,7 @@ private Client() {
 	bookButton.addActionListener(new ActionListener() {
 		@Override
 		public void actionPerformed(ActionEvent actionEvent) {
-			BookSelector dialog = new BookSelector(Client.this);
-			dialog.pack();
-			dialog.setVisible(true);
+            ((CardLayout) cards.getLayout()).show(cards, "startup");
 		}
 	});
 	goButton.addActionListener(new ActionListener() {
@@ -95,6 +101,62 @@ private Client() {
 			}
 		}
 	});
+    selectBookButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Book book = Book.getBookByName((String) books.getSelectedItem());
+            if(book != null)
+                readBook(book);
+        }
+    });
+    calculusButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            updateBooks();
+        }
+    });
+    precalculusButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            updateBooks();
+        }
+    });
+    appliedSeriesButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            updateBooks();
+        }
+    });
+    prevBook.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int i = books.getSelectedIndex();
+            if(i == 0)
+                books.setSelectedIndex(books.getItemCount() - 1);
+            else
+                books.setSelectedIndex(i - 1);
+            updateCover();
+        }
+    });
+    nextBook.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            int i = books.getSelectedIndex();
+            if(i == books.getItemCount() - 1)
+                books.setSelectedIndex(0);
+            else
+                books.setSelectedIndex(i + 1);
+            updateCover();
+        }
+    });
+    books.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            updateCover();
+        }
+    });
+    calculusButton.setSelected(true);
+    updateBooks();
 
 	panel.addComponentListener(new ComponentAdapter() {
 		@Override
@@ -103,6 +165,24 @@ private Client() {
 			updateGallery();
 		}
 	});
+}
+
+private void updateBooks() {
+    books.removeAllItems();
+    if(calculusButton.isSelected()) {
+        for(Book book : Book.calc) {
+            books.addItem(book.name);
+        }
+    } else if(precalculusButton.isSelected()) {
+        for(Book book : Book.precalc) {
+            books.addItem(book.name);
+        }
+    } else if(appliedSeriesButton.isSelected()) {
+        for(Book book : Book.applied) {
+            books.addItem(book.name);
+        }
+    }
+    updateCover();
 }
 
 public static void main(String[] args) {
@@ -166,6 +246,14 @@ private void update() {
 			downloadingPanel.setVisible(false);
 		}
 	}).start();
+}
+
+private void updateCover() {
+    cover.removeAll();
+    Book book = Book.getBookByName((String) books.getSelectedItem());
+    if(book != null)
+        cover.add(new JLabel(new ImageIcon(book.coverUrl)));
+    cover.updateUI();
 }
 
 void readBook(Book book) {
