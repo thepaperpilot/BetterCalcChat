@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 class Client {
 
+private static JFrame frame;
 private JPanel panel;
 private JPanel web;
 private JComboBox sectionSelector;
@@ -105,7 +106,7 @@ private Client() {
 }
 
 public static void main(String[] args) {
-	JFrame frame = new JFrame("A Better CalcChat Client");
+	frame = new JFrame("A Better CalcChat Client");
 	frame.setContentPane(new Client().panel);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	frame.setMinimumSize(new Dimension(720, 640));
@@ -179,6 +180,8 @@ void readBook(Book book) {
 		for(Chapter chapter : handler.chapters)
 			System.out.println(chapter);
 
+		frame.setTitle(book.name);
+		frame.setIconImage(ImageIO.read(book.coverUrl));
 		chapter = handler.chapters.get(0);
 		section = chapter.sections.get(0);
 		chapterSelector.removeAllItems();
