@@ -67,7 +67,7 @@ public void layoutContainer(Container target) {
 				Dimension d = m.getPreferredSize();
 				m.setSize(d.width, d.height);
 				int cellsWide = (int) Math.ceil(d.width / (float) cellWidth);
-				int cellsTall = Math.round(d.height / (float) cellHeight);
+				int cellsTall = (int) Math.ceil(d.height / (float) cellHeight);
 
 				while(true) {
 					if(cellsWide >= maxCells) {
@@ -98,6 +98,28 @@ public void layoutContainer(Container target) {
 								if(extraWidth > marginWidth)
 									continue inner;
 							}
+						}
+						levelOuter: while(true) {
+							int tempy = y + 1;
+							int tempx = 0;
+							while(cells.size() < tempy + 1)
+								cells.add(new boolean[maxCells]);
+							levelInner: for(; tempx < x; tempx++) {
+								for(int k = tempx; k < x + cellsWide; k++) {
+									if(cells.get(tempy)[k])
+										continue levelInner;
+									if(k == maxCells - 1) {
+										int extraWidth = d.width - (cellsWide - 1) * cellWidth;
+										int marginWidth = maxWidth - maxCells * cellWidth;
+										if(extraWidth > marginWidth)
+											continue levelInner;
+									}
+									x = tempx;
+									y = tempy;
+									continue levelOuter;
+								}
+							}
+							break;
 						}
 						//place
 						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));

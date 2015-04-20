@@ -259,7 +259,7 @@ BufferedImage getScaledInstance(BufferedImage img, int targetWidth, int targetHe
 
 // Set up custom LayoutManagers
 private void createUIComponents() {
-	web = new JPanel(new GridLayout(180, 50));
+	web = new JPanel(new GridLayout(180, 100));
 	gallery = new JPanel();
 	gallery.setLayout(new BoxLayout(gallery, BoxLayout.Y_AXIS));
 }
