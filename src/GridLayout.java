@@ -71,7 +71,6 @@ public void layoutContainer(Container target) {
 
 				while(true) {
 					if(cellsWide >= maxCells) {
-						y++;
 						x = 0;
 						//place
 						m.setLocation(insets.left + hgap + x * (cellWidth + hgap), insets.top + vgap + y * (cellHeight + vgap));
@@ -82,6 +81,7 @@ public void layoutContainer(Container target) {
 								cells.get(j)[k] = true;
 							}
 						}
+						y += cellsTall;
 						continue outer;
 					}
 
