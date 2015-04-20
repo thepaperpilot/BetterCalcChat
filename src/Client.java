@@ -188,7 +188,7 @@ public static void main(String[] args) {
 	frame = new JFrame("A Better CalcChat Client");
 	frame.setContentPane(new Client().panel);
 	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setMinimumSize(new Dimension(740, 640));
+	frame.setMinimumSize(new Dimension(760, 640));
 	frame.pack();
 	frame.setVisible(true);
 }
